@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Enquetes</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    input, button { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .voto-btn { width: 48%; display: inline-block; background: #28a745; margin-right: 2%; }
+    .voto-btn:last-child { margin-right: 0; background: #17a2b8; }
+    .enquete-item { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>📊 Criar Nova Enquete</h2>
+      <input type="text" id="pergunta" placeholder="Qual é a pergunta? (Ex: Qual a melhor linguagem?)">
+      <input type="text" id="opcao_a" placeholder="Opção A (Ex: JavaScript)">
+      <input type="text" id="opcao_b" placeholder="Opção B (Ex: Python)">
+      <button onclick="criarEnquete()">Criar Enquete</button>
+    </div>
+
+    <div class="card">
+      <h2>🔥 Enquetes Ativas</h2>
+      <div id="lista-enquetes">Carregando...</div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = '/api/enquetes';
+
+    async function carregarEnquetes() {
+      const res = await fetch(API_URL);
+      const enquetes = await res.json();
+      const div = document.getElementById('lista-enquetes');
+      div.innerHTML = '';
+
+      if(enquetes.length === 0) {
+        div.innerHTML = '<p>Nenhuma enquete cadastrada ainda.</p>';
+        return;
+      }
+
+      enquetes.forEach(e => {
+        div.innerHTML += `
+          <div class="enquete-item">
+            <h3>${e.pergunta}</h3>
+            <div>
+              <button class="voto-btn" onclick="votar(${e.id}, 'a')">
+                ${e.opcao_a} (${e.votos_a} votos)
+              </button>
+              <button class="voto-btn" onclick="votar(${e.id}, 'b')">
+                ${e.opcao_b} (${e.votos_b} votos)
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    async function criarEnquete() {
+      const pergunta = document.getElementById('pergunta').value;
+      const opcao_a = document.getElementById('opcao_a').value;
+      const opcao_b = document.getElementById('opcao_b').value;
+
+      if (!pergunta || !opcao_a || !opcao_b) return alert('Preencha todos os campos!');
+
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pergunta, opcao_a, opcao_b })
+      });
+
+      document.getElementById('pergunta').value = '';
+      document.getElementById('opcao_a').value = '';
+      document.getElementById('opcao_b').value = '';
+      carregarEnquetes();
+    }
+
+    async function votar(id, opcao) {
+      await fetch(`${API_URL}/${id}/votar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ opcao })
+      });
+      carregarEnquetes();
+    }
+
+    carregarEnquetes();
+  </script>
+</body>
+</html>

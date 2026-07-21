@@ -1,0 +1,42 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    networks:
+      - rede-frontend
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+
+    environment:
+      - DB_HOST=db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - rede-frontend
+      - rede-backend
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - dados_enquetes:/var/lib/postgresql/data
+    networks:
+      - rede-backend
+
+networks:
+  rede-frontend:
+  rede-backend:
+    internal: true
+
+volumes:
+  dados_enquetes:
