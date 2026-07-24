@@ -10,9 +10,13 @@
     input, button { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
     button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
     button:hover { background: #0056b3; }
+    button:disabled { background: #6c757d !important; cursor: not-allowed; opacity: 0.7; }
     .voto-btn { width: 48%; display: inline-block; background: #28a745; margin-right: 2%; }
     .voto-btn:last-child { margin-right: 0; background: #17a2b8; }
+    .btn-deletar { background: #dc3545; font-size: 0.85em; padding: 6px; margin-top: 12px; }
+    .btn-deletar:hover { background: #bd2130; }
     .enquete-item { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+    .ja-votou-msg { font-size: 0.85em; color: #6c757d; margin-top: 8px; font-style: italic; }
   </style>
 </head>
 <body>
@@ -46,17 +50,26 @@
       }
 
       enquetes.forEach(e => {
+        const jaVotou = localStorage.getItem(`votou_enquete_${e.id}`);
+        const disabled = jaVotou ? 'disabled' : '';
+
+        // AQUI ESTÁ O "LOOP": Adicionamos o botão de deletar em cada enquete
         div.innerHTML += `
           <div class="enquete-item">
             <h3>${e.pergunta}</h3>
             <div>
-              <button class="voto-btn" onclick="votar(${e.id}, 'a')">
+              <button class="voto-btn" ${disabled} onclick="votar(${e.id}, 'a')">
                 ${e.opcao_a} (${e.votos_a} votos)
               </button>
-              <button class="voto-btn" onclick="votar(${e.id}, 'b')">
+              <button class="voto-btn" ${disabled} onclick="votar(${e.id}, 'b')">
                 ${e.opcao_b} (${e.votos_b} votos)
               </button>
             </div>
+            ${jaVotou ? '<p class="ja-votou-msg">✓ Você já votou nesta enquete.</p>' : ''}
+            
+            <button class="btn-deletar" onclick="deletarEnquete(${e.id})">
+              🗑️ Excluir Enquete
+            </button>
           </div>
         `;
       });
@@ -82,11 +95,32 @@
     }
 
     async function votar(id, opcao) {
+      if (localStorage.getItem(`votou_enquete_${id}`)) {
+        alert('Você já votou nesta enquete!');
+        return;
+      }
+
       await fetch(`${API_URL}/${id}/votar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ opcao })
       });
+
+      localStorage.setItem(`votou_enquete_${id}`, 'true');
+      carregarEnquetes();
+    }
+
+    // NOVA FUNÇÃO: Chama o backend para excluir a enquete do banco
+    async function deletarEnquete(id) {
+      if (!confirm('Tem certeza que deseja apagar esta enquete?')) return;
+
+      await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE'
+      });
+
+      // Limpa a trava do localStorage caso a enquete tenha sido apagada
+      localStorage.removeItem(`votou_enquete_${id}`);
+
       carregarEnquetes();
     }
 
