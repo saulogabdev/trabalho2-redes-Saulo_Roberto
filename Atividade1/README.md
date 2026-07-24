@@ -1,77 +1,32 @@
-# Sistema de Enquetes
+# Exercício 1 - Sistema de Enquetes via Docker Compose
 
-## Descrição
+Este projeto disponibiliza uma aplicação web para criação e votação em enquetes, utilizando **Docker Compose** para orquestrar os serviços de frontend, backend e banco de dados PostgreSQL.
 
-Aplicação web para criação e votação em enquetes utilizando Docker.
+##  Tecnologias Utilizadas
 
-O projeto é composto por:
+* **Frontend:** HTML + Nginx
+* **Backend:** Node.js + Express
+* **Banco de Dados:** PostgreSQL
+* **Orquestrador:** Docker Compose
 
-- Frontend (Nginx + HTML)
-- Backend (Node.js + Express)
-- Banco de dados PostgreSQL
+##  Como Executar
 
----
+1. Garanta que o Docker esteja instalado e em execução.
+2. Na raiz do projeto, execute:
 
-# Estrutura do projeto
-
-```
-.
-├── backend
-│   ├── Dockerfile
-│   ├── index.js
-│   └── package.json
-│
-├── frontend
-│   ├── Dockerfile
-│   ├── index.html
-│   └── nginx.conf
-│
-├── compose.yaml
-├── .env.example
-└── README.md
-```
-
----
-
-## Pré-requisitos
-
-- Docker
-- Docker Compose
-
----
-
-## Como executar
-
-1. Baixe o projeto.
-2. Na pasta do projeto, execute:
-
-```bash
-docker compose up --build
-```
+   ```bash
+   docker compose up --build
+   ```
 
 3. Acesse a aplicação em:
 
-```
-http://localhost:8080
-```
+   ```
+   http://localhost:8080
+   ```
 
----
-
-## Encerrar a aplicação
-
-Para parar os containers:
-
-```bash
-docker compose down
-```
-
-
-
-## Funcionalidades
+## 📋 Funcionalidades
 
 - Criar enquetes
 - Listar enquetes
 - Registrar votos
-- Armazenar dados no PostgreSQL
-
----
+- Armazenar os dados no PostgreSQL
